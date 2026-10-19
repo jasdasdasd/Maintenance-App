@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meadow House Repairs</title>
+<style>
+:root{--bg:#f3f6f5;--card:#fff;--ink:#17302f;--muted:#46605e;--line:#b9c9c6;--accent:#0a5a66;--urgent:#8a1f14;--urgent-bg:#fbe9e6;--done:#1d5f36;--done-bg:#e3f3e8;--prog:#6b4a00;--prog-bg:#fff1cc;--new:#0a4a73;--new-bg:#e1f0fa}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1a1a;--card:#172625;--ink:#e8f1ef;--muted:#b4c7c4;--line:#3b5552;--accent:#7fd0dc;--urgent:#ffc2ba;--urgent-bg:#4a1c17;--done:#a9e5bd;--done-bg:#1b3d29;--prog:#ffdf8a;--prog-bg:#463609;--new:#a9d8f5;--new-bg:#12384f}}
+*{box-sizing:border-box}
+html{font-size:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font:1rem/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{padding:20px 24px;border-bottom:3px solid var(--accent);background:var(--card)}
+h1{margin:0;font-size:1.6rem;letter-spacing:-.01em}
+header p{margin:4px 0 0;color:var(--muted)}
+h2{font-size:1.25rem;margin:0 0 12px}
+h3{font-size:1rem;margin:16px 0 6px}
+main{display:grid;grid-template-columns:minmax(300px,380px) minmax(0,1fr);gap:24px;padding:24px;max-width:1280px;margin:0 auto}
+@media (max-width:800px){main{grid-template-columns:minmax(0,1fr);padding:14px}}
+section.panel{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:18px}
+label,legend{display:block;font-weight:600;margin:12px 0 4px}
+fieldset{border:0;padding:0;margin:0}
+.radio{display:inline-flex;align-items:center;gap:6px;margin:0 16px 0 0;font-weight:400}
+input[type=text],textarea{width:100%;font:inherit;color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:6px;padding:9px 10px}
+textarea{min-height:84px;resize:vertical}
+input[type=radio]{width:20px;height:20px;accent-color:var(--accent)}
+[aria-invalid=true]{border-color:var(--urgent)}
+button{font:inherit;font-weight:600;border-radius:6px;padding:9px 14px;border:2px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;margin:8px 8px 0 0}
+@media (prefers-color-scheme:dark){button{color:#0f1a1a}}
+button.alt{background:transparent;color:var(--accent)}
+button.done{background:var(--done);border-color:var(--done);color:#fff}
+@media (prefers-color-scheme:dark){button.done{background:#2f8a52;border-color:#2f8a52;color:#fff}}
+:focus-visible{outline:3px solid #1a6bff;outline-offset:2px}
+@media (prefers-color-scheme:dark){:focus-visible{outline-color:#ffd24d}}
+.err{color:var(--urgent);font-weight:600;margin:4px 0 0;min-height:0}
+.err:empty,.ok:empty{display:none}
+.ok{background:var(--done-bg);color:var(--done);border-radius:6px;padding:8px 12px;margin:0 0 12px;font-weight:600}
+.hint{color:var(--muted);font-size:.9rem;margin:2px 0 0}
+.job{background:var(--card);border:1px solid var(--line);border-left:6px solid var(--accent);border-radius:8px;padding:16px;margin:0 0 16px}
+.job.urgent{border-left-color:var(--urgent)}
+.top{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:6px}
+.id{font-weight:700;font-size:1.1rem;margin-right:4px}
+.badge{display:inline-block;padding:2px 10px;border-radius:999px;font-weight:700;font-size:.9rem}
+.s-New{background:var(--new-bg);color:var(--new)}.s-InProgress{background:var(--prog-bg);color:var(--prog)}.s-Completed{background:var(--done-bg);color:var(--done)}
+.p-Urgent{background:var(--urgent-bg);color:var(--urgent)}.p-Normal{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.desc{font-size:1.1rem;font-weight:600;margin:6px 0;overflow-wrap:anywhere;white-space:pre-wrap}
+.meta{color:var(--muted);margin:0 0 8px;overflow-wrap:anywhere}
+.latest{background:var(--bg);border-radius:6px;padding:8px 10px;margin:8px 0;overflow-wrap:anywhere;white-space:pre-wrap}
+ol.hist{list-style:none;margin:0;padding:0;border-left:2px solid var(--line)}
+ol.hist li{padding:4px 0 8px 12px;overflow-wrap:anywhere}
+ol.hist time{display:block;color:var(--muted);font-size:.9rem}
+ol.hist .t{white-space:pre-wrap}
+.upd{border-top:1px solid var(--line);margin-top:12px;padding-top:4px}
+.empty{color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Meadow House Repairs</h1>
+  <p>Report a repair, follow its progress and see what was done.</p>
+</header>
+<main>
+  <section class="panel" aria-labelledby="form-h">
+    <h2 id="form-h">Report a repair</h2>
+    <p id="created" class="ok" role="status" tabindex="-1"></p>
+    <form id="report" novalidate>
+      <label for="desc">Description of the repair</label>
+      <textarea id="desc" aria-describedby="desc-err"></textarea>
+      <p id="desc-err" class="err" role="alert"></p>
+      <label for="rep">Reporter name</label>
+      <input id="rep" type="text" autocomplete="off" aria-describedby="rep-err">
+      <p id="rep-err" class="err" role="alert"></p>
+      <fieldset>
+        <legend>Priority</legend>
+        <label class="radio"><input type="radio" name="prio" value="Normal" checked> Normal</label>
+        <label class="radio"><input type="radio" name="prio" value="Urgent"> Urgent</label>
+      </fieldset>
+      <button type="submit">Report repair</button>
+    </form>
+  </section>
+  <section aria-labelledby="jobs-h">
+    <h2 id="jobs-h">Repair jobs</h2>
+    <div id="jobs"></div>
+  </section>
+</main>
+<script>
+(function () {
+  var KEY = 'meadowHouseJobs';
+  var HOUSE = 'Meadow House';
+  var jobs = load();
+
+  function load() {
+    try { var j = JSON.parse(localStorage.getItem(KEY)); return Array.isArray(j) ? j : []; }
+    catch (e) { return []; }
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(jobs)); return true; } catch (e) { return false; }
+  }
+  function nextId() {
+    var m = 0;
+    jobs.forEach(function (j) { var n = parseInt(String(j.id).replace('MH-', ''), 10); if (n > m) m = n; });
+    return 'MH-' + String(m + 1).padStart(4, '0');
+  }
+  function fmt(iso) {
+    return new Date(iso).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'medium' });
+  }
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined) e.textContent = text; // always plain text, never HTML
+    return e;
+  }
+  function addEntry(job, type, text) {
+    job.history.push({ at: new Date().toISOString(), type: type, text: text });
+  }
+  function slug(s) { return s.replace(/\s+/g, ''); }
+
+  /* ---------- Report form ---------- */
+  var form = document.getElementById('report');
+  var descEl = document.getElementById('desc');
+  var repEl = document.getElementById('rep');
+  var created = document.getElementById('created');
+
+  function setErr(input, errEl, msg) {
+    errEl.textContent = msg;
+    if (msg) input.setAttribute('aria-invalid', 'true'); else input.removeAttribute('aria-invalid');
+  }
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var d = descEl.value.trim(), r = repEl.value.trim();
+    setErr(descEl, document.getElementById('desc-err'), d ? '' : 'Enter a description of the repair. It cannot be blank or only spaces.');
+    setErr(repEl, document.getElementById('rep-err'), r ? '' : 'Enter the reporter name. It cannot be blank or only spaces.');
+    created.textContent = '';
+    if (!d || !r) { (d ? repEl : descEl).focus(); return; } // valid input stays in the form
+    var prio = form.elements.prio.value === 'Urgent' ? 'Urgent' : 'Normal';
+    var now = new Date().toISOString();
+    var job = { id: nextId(), house: HOUSE, description: d, reporter: r, priority: prio, status: 'New', createdAt: now, history: [] };
+    addEntry(job, 'status', 'Job reported. Status: New. Priority: ' + prio + '.');
+    jobs.unshift(job);
+    var saved = save();
+    form.reset();
+    created.textContent = 'Job ' + job.id + ' created as New with ' + prio + ' priority.' + (saved ? '' : ' Warning: this browser could not save it.');
+    render();
+    created.focus();
+  });
+
+  /* ---------- Job cards ---------- */
+  function latestNote(job) {
+    for (var i = job.history.length - 1; i >= 0; i--) {
+      if (job.history[i].type === 'note') return job.history[i].text;
+    }
+    return '';
+  }
+
+  function buildCard(job) {
+    var card = el('article', 'job' + (job.priority === 'Urgent' ? ' urgent' : ''));
+    card.id = 'job-' + job.id;
+    card.setAttribute('aria-label', 'Repair job ' + job.id);
+
+    var top = el('div', 'top');
+    top.appendChild(el('span', 'id', job.id));
+    top.appendChild(el('span', 'badge s-' + slug(job.status), 'Status: ' + job.status));
+    top.appendChild(el('span', 'badge p-' + job.priority, job.priority === 'Urgent' ? 'Urgent priority' : 'Normal priority'));
+    card.appendChild(top);
+
+    var ok = el('p', 'ok'); ok.setAttribute('role', 'status'); ok.tabIndex = -1; ok.className = 'ok';
+    card.appendChild(ok);
+
+    card.appendChild(el('p', 'desc', job.description));
+    card.appendChild(el('p', 'meta', 'House: ' + job.house + ' | Reported by: ' + job.reporter + ' | Date reported: ' + fmt(job.createdAt)));
+
+    var ln = latestNote(job);
+    if (ln) {
+      var l = el('div', 'latest'); l.appendChild(el('strong', null, 'Latest progress note: ')); l.appendChild(document.createTextNode(ln));
+      card.appendChild(l);
+    }
+    if (job.status === 'Completed') {
+      var c = el('div', 'latest'); c.appendChild(el('strong', null, 'Completion note: ')); c.appendChild(document.createTextNode(job.completionNote || ''));
+      card.appendChild(c);
+    }
+
+    card.appendChild(el('h3', null, 'History'));
+    var ol = el('ol', 'hist');
+    job.history.forEach(function (h) {
+      var li = el('li');
+      li.appendChild(el('time', null, fmt(h.at)));
+      li.appendChild(el('span', 't', h.text));
+      ol.appendChild(li);
+    });
+    card.appendChild(ol);
+
+    if (job.status !== 'Completed') card.appendChild(buildUpdate(job, card));
+    return card;
+  }
+
+  function field(card, job, kind, label, buttons) {
+    var wrap = el('div');
+    var id = kind + '-' + job.id;
+    var lab = el('label', null, label); lab.setAttribute('for', id);
+    var ta = el('textarea'); ta.id = id; ta.setAttribute('aria-describedby', id + '-err');
+    var err = el('p', 'err'); err.id = id + '-err'; err.setAttribute('role', 'alert');
+    wrap.appendChild(lab); wrap.appendChild(ta); wrap.appendChild(err);
+    buttons.forEach(function (b) { wrap.appendChild(b); });
+    return { wrap: wrap, ta: ta, err: err };
+  }
+
+  function buildUpdate(job, card) {
+    var box = el('div', 'upd');
+
+    var saveBtn = el('button', null, 'Save progress note'); saveBtn.type = 'button';
+    var btns = [saveBtn], startBtn = null;
+    if (job.status === 'New') {
+      startBtn = el('button', 'alt', 'Move to In Progress'); startBtn.type = 'button';
+      btns.unshift(startBtn);
+    }
+    var p = field(card, job, 'progress', 'Progress note', btns);
+    box.appendChild(p.wrap);
+
+    var doneBtn = el('button', 'done', 'Mark as Completed'); doneBtn.type = 'button';
+    var c = field(card, job, 'complete', 'Completion note (required to complete)', [doneBtn]);
+    box.appendChild(c.wrap);
+
+    function fail(f, msg) {
+      f.err.textContent = msg; f.ta.setAttribute('aria-invalid', 'true'); f.ta.focus(); // typed text is kept
+    }
+    function finish(msg) {
+      var persisted = save();
+      var fresh = buildCard(job);
+      card.replaceWith(fresh);
+      var ok = fresh.querySelector('.ok');
+      ok.textContent = msg + (persisted ? '' : ' Warning: this browser could not save it.');
+      ok.focus();
+    }
+
+    if (startBtn) startBtn.addEventListener('click', function () {
+      job.status = 'In Progress';
+      var n = p.ta.value.trim();
+      addEntry(job, 'status', 'Moved to In Progress.');
+      if (n) addEntry(job, 'note', n);
+      finish('Saved: ' + job.id + ' is now In Progress.' + (n ? ' Progress note added.' : ''));
+    });
+    saveBtn.addEventListener('click', function () {
+      var n = p.ta.value.trim();
+      if (!n) return fail(p, 'Enter a progress note before saving. It cannot be blank or only spaces.');
+      if (job.status === 'New') { job.status = 'In Progress'; addEntry(job, 'status', 'Moved to In Progress.'); }
+      addEntry(job, 'note', n);
+      finish('Saved: progress note added to ' + job.id + '. Status: In Progress.');
+    });
+    doneBtn.addEventListener('click', function () {
+      var n = c.ta.value.trim();
+      if (!n) return fail(c, 'Enter a completion note to complete this job. It cannot be blank or only spaces. The job is unchanged.');
+      job.status = 'Completed'; job.completionNote = n;
+      addEntry(job, 'completed', 'Completed. Completion note: ' + n);
+      finish('Saved: ' + job.id + ' is now Completed.');
+    });
+    return box;
+  }
+
+  function render() {
+    var box = document.getElementById('jobs');
+    box.textContent = '';
+    if (!jobs.length) { box.appendChild(el('p', 'empty', 'No repair jobs yet. Use the form to report the first one.')); return; }
+    jobs.forEach(function (j) { box.appendChild(buildCard(j)); });
+  }
+  render();
+})();
+</script>
+</body>
+</html>
